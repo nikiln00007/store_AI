@@ -15,7 +15,8 @@ export const seedDatabase = async (isStandalone = false) => {
     if (isStandalone) {
       const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/store_ai';
       try {
-        await mongoose.connect(uri, { serverSelectionTimeoutMS: 2000 });
+        mongoose.set('bufferCommands', false);
+        await mongoose.connect(uri, { serverSelectionTimeoutMS: 2000, bufferCommands: false });
         console.log(`[Seed] 🌿 Connected to MongoDB at ${uri}`);
       } catch (err) {
         console.warn(`[Seed] ⚠️ Local MongoDB offline. Seeding Resilient In-Memory LocalStore...`);
