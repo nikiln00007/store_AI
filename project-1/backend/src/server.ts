@@ -41,25 +41,41 @@ app.use('/api/invoices', billingRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/analytics', analyticsRoutes);
 
-// Start Server & Auto-Seed
-const startServer = async () => {
-  await connectDB();
-  
-  // Auto-seed on startup so demo is immediately ready with 18 items, 4 suppliers, and transactions!
-  console.log(`[Store AI] 🌱 Initializing automatic demo seeding...`);
-  await seedDatabase(false);
-
-  app.listen(PORT, () => {
-    console.log(`\n=============================================================`);
-    console.log(`🌿 STORE AI BACKEND SERVER ONLINE ON PORT ${PORT}`);
-    console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
-    console.log(`📦 Seeded with 18 Realistic Retail Items & 4 Suppliers`);
-    console.log(`=============================================================\n`);
-  });
+// Serverless DB Initialization Guard
+let dbInitPromise: Promise<void> | null = null;
+const initDatabase = async () => {
+  if (!dbInitPromise) {
+    dbInitPromise = (async () => {
+      await connectDB();
+      console.log(`[Store AI] 🌱 Initializing automatic demo seeding...`);
+      await seedDatabase(false);
+    })();
+  }
+  return dbInitPromise;
 };
 
-startServer().catch(err => {
-  console.error(`[Server Error]`, err);
+app.use(async (req, res, next) => {
+  try {
+    await initDatabase();
+  } catch (err) {
+    console.error('[Store AI] DB Initialization error:', err);
+  }
+  next();
 });
+
+// Start Server locally (skip listen on Vercel serverless functions)
+if (!process.env.VERCEL) {
+  initDatabase().then(() => {
+    app.listen(PORT, () => {
+      console.log(`\n=============================================================`);
+      console.log(`🌿 STORE AI BACKEND SERVER ONLINE ON PORT ${PORT}`);
+      console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
+      console.log(`📦 Seeded with 18 Realistic Retail Items & 4 Suppliers`);
+      console.log(`=============================================================\n`);
+    });
+  }).catch(err => {
+    console.error(`[Server Error]`, err);
+  });
+}
 
 export default app;

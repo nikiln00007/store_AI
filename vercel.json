@@ -3,6 +3,10 @@
   "outputDirectory": "project-1/frontend/dist",
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
