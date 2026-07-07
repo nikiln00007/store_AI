@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import axios from 'axios';
+import { api } from '../lib/api.js';
 import { User, Item, Language } from '../types/index.js';
 
 interface CartItem extends Item {
@@ -47,6 +48,7 @@ const savedLang: Language = 'en';
 
 if (savedToken) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+  api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -58,12 +60,14 @@ export const useStore = create<StoreState>((set, get) => ({
     localStorage.setItem('dukaan_token', token);
     localStorage.setItem('dukaan_user', JSON.stringify(user));
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     set({ token, user, isAuthenticated: true });
   },
   logout: () => {
     localStorage.removeItem('dukaan_token');
     localStorage.removeItem('dukaan_user');
     delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     set({ token: null, user: null, isAuthenticated: false });
   },
 

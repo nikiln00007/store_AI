@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Workspace root package forwarding commands to project-1",
   "scripts": {
+    "postinstall": "npm install --prefix project-1 && npm install --prefix project-1/backend && npm install --prefix project-1/frontend",
     "dev": "npm run dev --prefix project-1",
     "build": "npm run build --prefix project-1",
     "start": "npm run start --prefix project-1"
