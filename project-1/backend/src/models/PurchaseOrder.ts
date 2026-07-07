@@ -46,6 +46,6 @@ const PurchaseOrderSchema: Schema = new Schema({
   notes: { type: String, default: 'Please dispatch urgently. Payment via UPI upon delivery.' },
   orderDate: { type: Date, default: Date.now },
   expectedDate: { type: Date, default: () => new Date(Date.now() + 86400000 * 2) } // 2 days later
-});
+}, { bufferCommands: false, bufferTimeoutMS: 100 });
 
 export const PurchaseOrder = mongoose.model<IPurchaseOrder>('PurchaseOrder', PurchaseOrderSchema);

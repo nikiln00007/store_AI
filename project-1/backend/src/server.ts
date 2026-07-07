@@ -29,25 +29,7 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Welcome Route
-app.get('/', (req: Request, res: Response) => {
-  res.json({
-    name: 'Store AI — Smart Autonomous Business Assistant',
-    version: '1.0.0',
-    status: 'Active 🌿',
-    message: 'Welcome! Backend server is 100% online and operational.'
-  });
-});
-
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/suppliers', suppliersRoutes);
-app.use('/api/invoices', billingRoutes);
-app.use('/api/ai', aiRoutes);
-app.use('/api/analytics', analyticsRoutes);
-
-// Serverless DB Initialization Guard
+// Serverless DB Initialization Guard — runs BEFORE any route handler
 let dbInitPromise: Promise<void> | null = null;
 const initDatabase = async () => {
   if (!dbInitPromise) {
@@ -60,14 +42,36 @@ const initDatabase = async () => {
   return dbInitPromise;
 };
 
+// CRITICAL: DB init middleware MUST be registered BEFORE all routes
+// This ensures connectDB() and seedDatabase() run before any route handler touches the database
 app.use(async (req, res, next) => {
   try {
     await initDatabase();
   } catch (err) {
     console.error('[Store AI] DB Initialization error:', err);
+    // Even if DB init fails, continue — routes have their own fallback logic
   }
   next();
 });
+
+// Welcome Route
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    name: 'Store AI — Smart Autonomous Business Assistant',
+    version: '1.0.0',
+    status: 'Active 🌿',
+    dbMode: global.isUsingFallbackDB ? 'In-Memory Resilient Store' : 'MongoDB',
+    message: 'Welcome! Backend server is 100% online and operational.'
+  });
+});
+
+// API Routes — registered AFTER the DB init middleware
+app.use('/api/auth', authRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/suppliers', suppliersRoutes);
+app.use('/api/invoices', billingRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Start Server locally (skip listen on Vercel serverless functions)
 if (!process.env.VERCEL) {

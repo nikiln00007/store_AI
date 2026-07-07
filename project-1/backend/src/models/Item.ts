@@ -32,6 +32,6 @@ const ItemSchema: Schema = new Schema({
   supplierName: { type: String },
   gstRate: { type: Number, default: 5 },
   updatedAt: { type: Date, default: Date.now }
-});
+}, { bufferCommands: false, bufferTimeoutMS: 100 });
 
 export const Item = mongoose.model<IItem>('Item', ItemSchema);

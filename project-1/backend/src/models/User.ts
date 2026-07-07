@@ -28,6 +28,6 @@ const UserSchema: Schema = new Schema({
   upiId: { type: String, default: 'rahul.kirana@okaxis' },
   languagePreference: { type: String, enum: ['en', 'hi', 'hinglish'], default: 'hinglish' },
   createdAt: { type: Date, default: Date.now }
-});
+}, { bufferCommands: false, bufferTimeoutMS: 100 });
 
 export const User = mongoose.model<IUser>('User', UserSchema);

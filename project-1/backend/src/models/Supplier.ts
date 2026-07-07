@@ -26,6 +26,6 @@ const SupplierSchema: Schema = new Schema({
   paymentTerms: { type: String, default: 'Immediate' },
   deliveryTimeDays: { type: Number, default: 1 },
   createdAt: { type: Date, default: Date.now }
-});
+}, { bufferCommands: false, bufferTimeoutMS: 100 });
 
 export const Supplier = mongoose.model<ISupplier>('Supplier', SupplierSchema);

@@ -54,6 +54,6 @@ const InvoiceSchema: Schema = new Schema({
   paymentMethod: { type: String, enum: ['Cash', 'UPI', 'Khata'], default: 'UPI' },
   status: { type: String, enum: ['Paid', 'Pending'], default: 'Paid' },
   createdAt: { type: Date, default: Date.now }
-});
+}, { bufferCommands: false, bufferTimeoutMS: 100 });
 
 export const Invoice = mongoose.model<IInvoice>('Invoice', InvoiceSchema);
