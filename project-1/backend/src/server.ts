@@ -1,6 +1,12 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+
+// Disable Mongoose command buffering globally BEFORE any models or routes are imported!
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferTimeoutMS', 100);
+
 import { connectDB } from './config/db.js';
 import { seedDatabase } from './utils/seed.js';
 import authRoutes from './routes/auth.routes.js';

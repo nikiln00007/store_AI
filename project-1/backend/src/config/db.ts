@@ -7,12 +7,25 @@ dotenv.config();
 // Global flag to indicate if we are running on MongoDB or Resilient In-Memory Fallback
 declare global {
   var isUsingFallbackDB: boolean;
+  var _fallbackFlag: boolean | undefined;
 }
-global.isUsingFallbackDB = false;
+
+// Make global.isUsingFallbackDB dynamically return true whenever Mongoose is not actively connected!
+Object.defineProperty(global, 'isUsingFallbackDB', {
+  get: function() {
+    return this._fallbackFlag === true || mongoose.connection.readyState !== 1;
+  },
+  set: function(val: boolean) {
+    this._fallbackFlag = val;
+  },
+  configurable: true
+});
+global._fallbackFlag = false;
 
 export const connectDB = async (): Promise<void> => {
-  // Always disable command buffering so Mongoose never hangs or waits 10s on uncoordinated queries
+  // Always disable command buffering so Mongoose never hangs or waits on uncoordinated queries
   mongoose.set('bufferCommands', false);
+  mongoose.set('bufferTimeoutMS', 100);
 
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dukaan_ai';
   const isServerlessWithoutCloudDB = process.env.VERCEL && (!process.env.MONGODB_URI || uri.includes('localhost') || uri.includes('127.0.0.1'));
