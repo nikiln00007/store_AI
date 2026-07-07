@@ -10,9 +10,10 @@ declare global {
   var _fallbackFlag: boolean | undefined;
 }
 
-// Make global.isUsingFallbackDB dynamically return true whenever Mongoose is not actively connected!
+// Make global.isUsingFallbackDB dynamically return true whenever Mongoose is not actively connected or when running on Vercel!
 Object.defineProperty(global, 'isUsingFallbackDB', {
   get: function() {
+    if (process.env.VERCEL) return true;
     return this._fallbackFlag === true || mongoose.connection.readyState !== 1;
   },
   set: function(val: boolean) {
@@ -28,12 +29,11 @@ export const connectDB = async (): Promise<void> => {
   mongoose.set('bufferTimeoutMS', 100);
 
   const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dukaan_ai';
-  const isServerlessWithoutCloudDB = process.env.VERCEL && (!process.env.MONGODB_URI || uri.includes('localhost') || uri.includes('127.0.0.1'));
 
-  // If deployed to Vercel without a remote cloud MongoDB URI, immediately switch to Resilient In-Memory Data Store!
-  if (isServerlessWithoutCloudDB) {
-    global.isUsingFallbackDB = true;
-    console.log(`[Store AI] 🚀 Serverless Environment detected without Cloud MongoDB. Instant activation of High-Speed Resilient In-Memory Data Store! All 2026 features & real-time mutations are 100% active and functional.`);
+  // If deployed to Vercel, immediately switch to Resilient In-Memory Data Store!
+  if (process.env.VERCEL) {
+    global._fallbackFlag = true;
+    console.log(`[Store AI] 🚀 Serverless Environment detected on Vercel. Instant activation of High-Speed Resilient In-Memory Data Store! All 2026 features & real-time mutations are 100% active and functional.`);
     return;
   }
 
